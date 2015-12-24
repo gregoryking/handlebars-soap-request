@@ -65,19 +65,17 @@ Generate a sample service request using [SoapUI](http://www.soapui.org/) or some
 	
 *	errorLogger
 
-	Optional. The default error logging behaviour is to console.log the details. To override this you need to specify your own errorLogger like this:
+	Optional. Function. The default error logging behaviour is to console.log the details. To override this you need to specify your own errorLogger like this:
 	
-		var myErrorLogger = {
-			//The start function will be called before the service is invoked
-			start: function(serviceName) {
-				var st = Date.now(); //May want to remember the current time so we can log the duration of the failed service call
-				return {
-					//The onError function is called if any error is returned by the service (including SOAP Faults)
-					onError: function(soapReq, errorResponse) {
-						var duration = Date.now() - st;
-					}
-				};
-			}
+		//The errorLogger function will be called before the service is invoked so that any initial setup can be done
+		var myErrorLogger = function(serviceName) {
+			var st = Date.now(); //E.g. We may want to remember the current time so we can log the duration of the failed service call
+			return {
+				//The onError function is only called if an error is returned by the service (including unexpected SOAP Faults). This is where the error logging should happen
+				onError: function(soapReq, errorResponse) {
+					var duration = Date.now() - st;
+				}
+			};
 		};
 	
 		var options = {
@@ -93,10 +91,10 @@ Generate a sample service request using [SoapUI](http://www.soapui.org/) or some
 	
 *	isExpectedFault
 
-	Optional. Function. If you need to recognise certain SOAP Faults as expected behaviour (not errors) then you can provide your own isExpectedFault function. It should look something like this:
+	Optional. Function returning a boolean. If you need to recognise certain SOAP Faults as expected behaviour (not errors) then you can provide your own isExpectedFault function. Here is an example:
 	
 		function isExpectedFault(json) {
-			return xml2json.getChildNode(json.root, ['Body','Fault','Detail','SomeExpectedException']);
+			return !!xml2json.getChildNode(json.root, ['Body','Fault','Detail','SomeExpectedException']);
 		}
 	
 		var options = {
