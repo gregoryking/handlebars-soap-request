@@ -1,0 +1,15 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:soap1="http://mydomain.com/ws/soapheaders">
+	<soap:Header>
+		<soap1:locale>en_AU</soap1:locale>
+	</soap:Header>
+	<soap:Body>
+		<Fault>
+			<Detail>
+				<MyServiceException>
+					<ErrorCode>ABC</ErrorCode>
+					<FaultString>Something bad happened</FaultString>
+				</MyServiceException>
+			</Detail>
+		</Fault>
+	</soap:Body>
+</soap:Envelope>

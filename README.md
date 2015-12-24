@@ -1,2 +1,107 @@
 # handlebars-soap-request
-SOAP/XML request using a Handlebars template
+SOAP/XML request using a Handlebars template.
+
+This code only exists because I needed to handle a bunch of varied SOAP/XML service responses (some with namespaces, some without, soap11, soap12, etc...) and had to fall back to basics to get it working consistently.
+
+Generate a sample service request using [SoapUI](http://www.soapui.org/) or something similar and then make a [Handlebars](http://handlebarsjs.com/) template from it.
+
+## Example usage
+
+	var soapRequest = require('handlebars-soap-request'); 
+	
+	var options = {
+		handlebarsTemplate: '/path/to/my/template/file',
+		handlebarsParams: jsonParams,
+		url: 'http://my/service/endpoint'
+	};
+	
+	soapRequest(options, function(err, response) {
+		
+	});
+
+#### Default behaviour
+*	Sends a soap12 request. 
+
+	Specify a soapAction (see options below) to send a soap11 request.
+
+*	Returns a JSON response using the [basic-xml2json](https://www.npmjs.com/package/basic-xml2json) parser to parse the SOAP/XML.
+
+	If you don't want any XML parsing, set options.xmlResponse = true (see options below).
+	
+*	Registers a "cdata"	Handlebars helper that wraps the text with <![CDATA[ ... ]]>. You can use it something like this:
+
+		<name>{{{cdata name}}}</name>
+
+###### soapRequest:options
+*	url
+
+	Mandatory. String. The service endpoint url.
+	
+*	handlebarsTemplate
+
+	Mandatory. String. The path to the Handlebars template file.
+	
+*	handlebarsParams
+
+	Optional. Object. The JSON data to be provided to the Handlebars template
+	
+*	handlebarsPartials
+
+	Optional. Array of { name: 'nameForPartial', filename: 'path/to/partial' }.
+	
+	Partial template files are loaded and registered under the specified name.
+	
+*	soapAction
+
+	Optional. String. If specified, a soap11 request will be sent. The SOAPAction header will contain the value specified here.
+	
+*	requestHeaders
+
+	Optional. Object. If specified, will be used in place of the default soap12 or soap11 headers.
+	
+*	xmlResponse
+
+	Optional. Boolean. If true, the response will be the unaltered SOAP/XML body from the service.
+	
+*	errorLogger
+
+	Optional. The default error logging behaviour is to console.log the details. To override this you need to specify your own errorLogger like this:
+	
+		var myErrorLogger = {
+			//The start function will be called before the service is invoked
+			start: function(serviceName) {
+				var st = Date.now(); //May want to remember the current time so we can log the duration of the failed service call
+				return {
+					//The onError function is called if any error is returned by the service (including SOAP Faults)
+					onError: function(soapReq, errorResponse) {
+						var duration = Date.now() - st;
+					}
+				};
+			}
+		};
+	
+		var options = {
+			handlebarsTemplate: '/path/to/my/template/file',
+			handlebarsParams: jsonParams,
+			url: 'http://my/service/endpoint',
+			errorLogger: myErrorLogger
+		};
+	
+*	serviceName
+
+	Optional. String. If provided, will be passed to the start method of the error logger as the serviceName used to identify the service being invoked. If not provided, the url will be passed to the error logger instead.
+	
+*	isExpectedFault
+
+	Optional. Function. If you need to recognise certain SOAP Faults as expected behaviour (not errors) then you can provide your own isExpectedFault function. It should look something like this:
+	
+		function isExpectedFault(json) {
+			return xml2json.getChildNode(json.root, ['Body','Fault','Detail','SomeExpectedException']);
+		}
+	
+		var options = {
+			handlebarsTemplate: '/path/to/my/template/file',
+			url: 'http://my/service/endpoint',
+			isExpectedFault: isExpectedFault
+		};
+	
