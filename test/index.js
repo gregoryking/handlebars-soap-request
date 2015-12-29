@@ -1,8 +1,7 @@
 'use strict';
 
 var should = require('should');
-var rewire = require('rewire');
-var soapRequest = rewire('../lib/index.js');
+var soapRequest = require('../lib/index.js');
 var xml2json = require('basic-xml2json');
 var fs = require('fs');
 

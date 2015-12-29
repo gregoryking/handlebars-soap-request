@@ -31,6 +31,29 @@ Generate a sample service request using [SoapUI](http://www.soapui.org/) or some
 *	Registers a "cdata"	Handlebars helper that wraps the text with <![CDATA[ ... ]]>. You can use it something like this:
 
 		<name>{{{cdata name}}}</name>
+		
+*	Registers an "xmldatetime" Handlebars helper that formats a date in standard XML date/time format (YYYY-MM-DDTHH:mm:ss.SSSZ) or an alternate custom format. For example:
+
+		<mytimestamp>{{{xmldatetime myDateTime}}}</mytimestamp>
+		<mytimestamp>{{{xmldatetime myDateTime myAlternateFormat}}}</mytimestamp>
+		
+	It uses [moment](http://momentjs.com/) to format the date/time.
+	
+*	Registers an "xmldatetimeoffset" Handlerbars helper that offsets the date/time to something equivalent in a specific timezone. Ridiculous right! You might only need this if you are unlucky enough to deal with
+	legacy systems that don't deal with different timezones very well.
+	
+	It allows you to capture something like 2015-12-29 12:30 GMT+06 and convert it to 2015-12-29 12:30 GMT+10. I.e. something that looks the same when viewed in a different timezone. You can use it like this:
+	
+		<mytimestamp>{{{xmldatetimeoffset myDateTime}}}</mytimestamp>
+		<mytimestamp>{{{xmldatetimeoffset myDateTime mySourceTimezoneOffset}}}</mytimestamp>
+		<mytimestamp>{{{xmldatetimeoffset myDateTime mySourceTimezoneOffset myTargetTimezone}}}</mytimestamp>
+		<mytimestamp>{{{xmldatetimeoffset myDateTime mySourceTimezoneOffset myTargetTimezone myAlternateFormat}}}</mytimestamp>
+		
+	If you don't specify a source timezone offset (mySourceTimezoneOffset) then myDateTime.getTimezoneOffset() will be used.
+
+	If you don't specify a target timezone (myTargetTimezone) then "Australia/Melbourne" will be used.
+	
+	If you don't specify an alternate custom format then the standard XML date/time format (YYYY-MM-DDTHH:mm:ss.SSSZ) will be used.
 
 ###### soapRequest:options
 *	url
