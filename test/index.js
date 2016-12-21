@@ -6,12 +6,12 @@ var xml2json = require('basic-xml2json');
 var fs = require('fs');
 
 describe('Handlebars Soap Request', function() {
-	
+
 	var requestParams;
 	var responseErr;
 	var responseXml;
   var coreOptions;
-	
+
 	beforeEach(function(done) {
     responseErr = null;
     responseXml = '<?xml version="1.0"?><soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope"><soap12:Body></soap12:Body></soap12:Envelope>';
@@ -45,8 +45,8 @@ describe('Handlebars Soap Request', function() {
 
 	it('should register partial Handlebars templates', function(done) {
     coreOptions.handlebarsTemplate = __dirname + '/spec.soap.handlebars';
-		coreOptions.handlebarsParams = { 
-      name: 'A & A Smash Repairs', 
+		coreOptions.handlebarsParams = {
+      name: 'A & A Smash Repairs',
       postalAddress: { suburb: 'Maroubra', state: 'NSW', postcode: '2035' },
       billingAddress: { suburb: 'Sydney', state: 'NSW', postcode: '2000' }
     };
@@ -129,7 +129,7 @@ describe('Handlebars Soap Request', function() {
         };
       };
       coreOptions.handlebarsParams = { test: 'Error Test' };
-      
+
       soapRequest(coreOptions, function(err, json) {
         err.should.equal('Service call failed. See the error log for details');
         serviceName.should.equal(coreOptions.url);
@@ -167,11 +167,11 @@ describe('Handlebars Soap Request', function() {
     fs.readFile(__dirname + '/spec.soap.fault.xml', 'utf8', function(err, xml) {
       if (err) { return done(err); }
       responseXml = xml;
-      
+
       coreOptions.isExpectedFault = function(json) {
         return !!xml2json.getChildNode(json.root, ['Body','Fault','Detail','MyServiceException']);
       };
-      
+
       soapRequest(coreOptions, function(err, json) {
         should(err).equal(null);
         done();
