@@ -5,8 +5,8 @@ var soapRequest = require('../lib/index.js');
 var xml2json = require('basic-xml2json');
 var fs = require('fs');
 
-describe('Handlebars Soap Request', function() {
 
+describe('Handlebars Soap Request', function() {
 	var requestParams;
 	var responseErr;
 	var responseXml;
@@ -99,7 +99,8 @@ describe('Handlebars Soap Request', function() {
 	it('should parse the soap body xml into JSON', function(done) {
 		soapRequest(coreOptions, function(err, json) {
       if (err) { return done(err); }
-			json.root.name.should.equal('Envelope');
+			should.exist(json.Envelope);
+			// json.root.name.should.equal('Envelope');
 			done();
 		});
 	});
@@ -164,12 +165,18 @@ describe('Handlebars Soap Request', function() {
 	});
 
 	it('should allow expected SOAP Faults to recognised and not reported as errors', function(done) {
+debugger
     fs.readFile(__dirname + '/spec.soap.fault.xml', 'utf8', function(err, xml) {
       if (err) { return done(err); }
       responseXml = xml;
 
       coreOptions.isExpectedFault = function(json) {
-        return !!xml2json.getChildNode(json.root, ['Body','Fault','Detail','MyServiceException']);
+				try {
+					if(json.Envelope.Body.Fault.Detail.MyServiceException) return true;
+				}
+				catch(err){
+	        return false;
+				}
       };
 
       soapRequest(coreOptions, function(err, json) {
